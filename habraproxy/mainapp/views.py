@@ -1,3 +1,6 @@
-from django.shortcuts import render
+from django.shortcuts import HttpResponse
 
-# Create your views here.
+
+def proxy_view(request, url):
+    html = '<h1>Hello world</h1>'
+    return HttpResponse(html)
