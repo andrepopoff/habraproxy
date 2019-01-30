@@ -3,5 +3,6 @@ from requests import get
 
 
 def proxy_view(request, url):
-    html = get('https://habr.com/' + url).text
+    raw_html = get('https://habr.com/' + url).text
+    html = raw_html.replace('href="https://habr.com/', 'href="http://{}/'.format(request.get_host()))
     return HttpResponse(html)
