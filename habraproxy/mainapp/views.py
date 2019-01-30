@@ -1,6 +1,7 @@
 from django.shortcuts import HttpResponse
+from requests import get
 
 
 def proxy_view(request, url):
-    html = '<h1>Hello world</h1>'
+    html = get('https://habr.com/' + url).text
     return HttpResponse(html)
