@@ -4,19 +4,24 @@ from bs4 import BeautifulSoup
 
 
 def set_jquery_script_tag(html, src):
+    """
+    Adds <script></script> tag to HTML code
+    :param html: bs4.BeautifulSoup object that contains HTML code
+    :param src: the value of the <script> 'src' attribute
+    """
     jquery_script = html.new_tag('script')
     jquery_script.attrs['type'] = 'text/javascript'
     jquery_script.attrs['src'] = src
 
     try:
-        html.append(jquery_script)
+        html.head.append(jquery_script)
     except AttributeError:
         pass
 
 
 def proxy_view(request, url):
     """
-    The view that is responsible for displaying the site https://habr.com/.
+    The view that displays pages of the site https://habr.com/.
     Appends ™ to all 6 letter words
     """
     source_html = get('https://habr.com/' + url).text
