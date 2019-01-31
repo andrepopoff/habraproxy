@@ -9,14 +9,17 @@ def set_jquery_script_tag(html, src):
     :param html: bs4.BeautifulSoup object that contains HTML code
     :param src: the value of the <script> 'src' attribute
     """
-    jquery_script = html.new_tag('script')
-    jquery_script.attrs['type'] = 'text/javascript'
-    jquery_script.attrs['src'] = src
-
     try:
-        html.head.append(jquery_script)
+        jquery_script = html.new_tag('script')
+        jquery_script.attrs['type'] = 'text/javascript'
+        jquery_script.attrs['src'] = src
     except AttributeError:
-        pass
+        print('"html" parameter is not a bs4 object')
+    else:
+        try:
+            html.head.append(jquery_script)
+        except AttributeError:
+            html.append(jquery_script)
 
 
 def proxy_view(request, url):
