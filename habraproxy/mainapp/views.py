@@ -7,7 +7,7 @@ def set_jquery_script_tag(html, src):
     """
     Adds <script></script> tag to HTML code
     :param html: bs4.BeautifulSoup object that contains HTML code
-    :param src: the value of the <script> 'src' attribute
+    :param src: the value for the <script> 'src' attribute
     """
     try:
         jquery_script = html.new_tag('script')
