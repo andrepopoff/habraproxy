@@ -1,4 +1,6 @@
 from django.test import TestCase
+from django.shortcuts import HttpResponse
+from django.test.client import RequestFactory
 from bs4 import BeautifulSoup
 
 from mainapp.views import proxy_view, set_jquery_script_tag
@@ -57,3 +59,18 @@ class SetJQueryScriptTagTest(TestCase):
             set_jquery_script_tag(obj1, 'some text')
             self.assertEqual(obj1, obj2)
             self.assertEqual(set_jquery_script_tag(obj2, 'some text'), None)
+
+
+class ProxyViewTest(TestCase):
+    """
+    Tests for proxy_view func in mainapp/views.py
+    """
+    def setUp(self):
+        self.factory = RequestFactory()
+
+    def test_response_type(self):
+        """
+        Check the type of response
+        """
+        request = self.factory.get('/')
+        self.assertEqual(type(HttpResponse()), type(proxy_view(request, '')))
