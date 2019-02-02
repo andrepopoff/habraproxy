@@ -12,8 +12,11 @@ def delete_script_and_style_tags(soup_obj):
     :param soup_obj: bs4.BeautifulSoup object
     :return: None
     """
-    for tag in soup_obj(['script', 'style']):
-        tag.decompose()
+    try:
+        for tag in soup_obj(['script', 'style']):
+            tag.decompose()
+    except (TypeError, AttributeError):
+        print('Parameter "soup_obj" is not equal to bs4.BeautifulSoup object')
 
 
 def replace_words_in_html(text, changed_words, html):
