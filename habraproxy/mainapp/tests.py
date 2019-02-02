@@ -16,7 +16,6 @@ class DeleteTagsTest(TestCase):
         """
         Check what function returns
         """
-        print(self.soup_obj2)
         self.assertEqual(delete_script_and_style_tags(self.soup_obj1), None)
 
     def test_with_valid_func_param(self):
@@ -50,3 +49,38 @@ class DeleteTagsTest(TestCase):
             self.assertEqual(delete_script_and_style_tags(param), None)
             self.assertEqual(param, params_copy[idx])
 
+
+class ReplaceWordsTest(TestCase):
+    """
+    Tests for replace_words_in_html func in mainapp/views.py
+    """
+    def setUp(self):
+        self.html = '<h1>Hello world</h1>'
+        self.soup_obj = BeautifulSoup(self.html, 'lxml')
+        self.changed_words = {}
+        self.string = self.soup_obj.string
+
+    def test_what_func_returns(self):
+        """
+        Check what function returns
+        """
+        # Check the type of response function
+        new_html = replace_words_in_html(self.string, self.changed_words, self.html)
+        self.assertEqual(type(new_html), type(self.html))
+
+    def test_without_six_letter_words(self):
+        """
+        Check answer if html does not contain 6 letter words
+        """
+        new_html = replace_words_in_html(self.string, self.changed_words, self.html)
+        self.assertEqual(new_html, self.html)
+
+    def test_with_six_letter_words(self):
+        """
+        Check answer if html contains 6 letter words
+        """
+        html = '<h1>Friends friend</h1>'
+        soup_obj = BeautifulSoup(html, 'lxml')
+        changed_html = '<h1>Friends friend™</h1>'
+        new_html = replace_words_in_html(soup_obj.string, self.changed_words, html)
+        self.assertEqual(new_html, changed_html)
