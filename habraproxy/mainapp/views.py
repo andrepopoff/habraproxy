@@ -25,17 +25,20 @@ def replace_words_in_html(text, changed_words, html):
     Example: letter --> letter™
 
     :param text: bs4.element.NavigableString or bs4.element.text
-    :param changed_words: list of words that have already been replaced
+    :param changed_words: set of words that have already been replaced
     :param html: string containing HTML code
     :return: changed string containing HTML code
     """
-    words_of_six_letters = re.findall(r'\b(\w{6})\b', text)
-    for word in words_of_six_letters:
-        if word not in changed_words and not word.replace('.', '', 1).isdigit():
-            html = re.sub(r'\b({})\b'.format(word), word + '™', html)
-            changed_words.add(word)
-
-    return html
+    try:
+        words_of_six_letters = re.findall(r'\b(\w{6})\b', text)
+        for word in words_of_six_letters:
+            if word not in changed_words and not word.replace('.', '', 1).isdigit():
+                html = re.sub(r'\b({})\b'.format(word), word + '™', html)
+                changed_words.add(word)
+    except (AttributeError, TypeError):
+        print('One of the parameters of the function of the wrong type')
+    finally:
+        return html
 
 
 def create_bs4_obj(html):
