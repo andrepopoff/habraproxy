@@ -84,3 +84,41 @@ class ReplaceWordsTest(TestCase):
         changed_html = '<h1>Friends friend™</h1>'
         new_html = replace_words_in_html(soup_obj.string, self.changed_words, html)
         self.assertEqual(new_html, changed_html)
+
+
+class CreateBsObjectTest(TestCase):
+    """
+    Tests for create_bs4_obj func in mainapp/views.py
+    """
+    def test_what_func_returns(self):
+        """
+        Check what function returns
+        """
+        # HTML without script ans style tags
+        html_without_scripts = '<h1>Hello world</h1>'
+        soup_obj = BeautifulSoup(html_without_scripts, 'lxml')
+        new_soup = create_bs4_obj(html_without_scripts)
+        self.assertEqual(new_soup, soup_obj)
+
+        # HTML with script tag
+        html_with_scripts = '<h1>Hello world</h1><script>text</script>'
+        soup_obj = BeautifulSoup(html_with_scripts, 'lxml')
+        new_soup = create_bs4_obj(html_with_scripts)
+        self.assertNotEqual(new_soup, soup_obj)
+
+        # HTML with style tag
+        html_with_styles = '<h1>Hello world</h1><style>text</style>'
+        soup_obj = BeautifulSoup(html_with_styles, 'lxml')
+        new_soup = create_bs4_obj(html_with_styles)
+        self.assertNotEqual(new_soup, soup_obj)
+
+    def test_with_invalid_param(self):
+        """
+        Check how the function works when receiving invalid parameter instead of string
+        """
+        params = [1, 2.0, {'mutable'}, ['some list'], max]
+        for param in params:
+            new_soup = create_bs4_obj(param)
+            self.assertEqual(new_soup, BeautifulSoup('', 'lxml'))
+
+
