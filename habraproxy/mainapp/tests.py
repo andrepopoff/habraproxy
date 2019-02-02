@@ -1,4 +1,6 @@
 from django.test import TestCase
+from django.shortcuts import HttpResponse
+from django.test.client import RequestFactory
 from bs4 import BeautifulSoup
 
 from mainapp.views import delete_script_and_style_tags, replace_words_in_html, create_bs4_obj, add_tms, proxy_view
@@ -141,3 +143,17 @@ class AddTMsTest(TestCase):
         new_html = add_tms(html_with_six_letter_words)
         self.assertEqual(new_html, '<h1>Friend™ друзья™</h1>')
 
+
+class ProxyViewTest(TestCase):
+    """
+    Tests for proxy_view func in mainapp/views.py
+    """
+    def setUp(self):
+        self.factory = RequestFactory()
+
+    def test_returned_type(self):
+        """
+        Checks that function returns
+        """
+        request = self.factory.get('/')
+        self.assertEqual(type(proxy_view(request, '/')), type(HttpResponse('')))
