@@ -13,20 +13,27 @@ $ git clone https://github.com/andrepopoff/habraproxy src
 ```bash
 $ cd src
 ```
-3. Создайте виртуальное окружение и активируйте его:
+3. Есть 2 версии программы:
+* 1 добавляет значки «™» с помощью `jQuery` скрипта (находится в ветке `master`)
+* 2 написана исключительно на `Python` (находится в ветке `only_python`)
+Для того, чтобы переключиться на версию `only_python` используйте команду:
+```bash
+$ git checkout only_python
+```
+4. Создайте виртуальное окружение и активируйте его:
 ```bash
 $ virtualenv venv
 $ source venv/bin/activate
 ```
-4. Установите зависимости
+5. Установите зависимости
 ```bash
 $ pip install -r requirements.txt
 ```
-5. Переместитесь в директорию `habraproxy`:
+6. Переместитесь в директорию `habraproxy`:
 ```bash
 $ cd habraproxy
 ```
-6. Запустите Django сервер:
+7. Запустите Django сервер:
 ```bash
 $ python manage.py runserver
 ```
