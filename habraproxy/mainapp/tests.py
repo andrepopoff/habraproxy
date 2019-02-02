@@ -1,76 +1,49 @@
 from django.test import TestCase
-from django.shortcuts import HttpResponse
-from django.test.client import RequestFactory
 from bs4 import BeautifulSoup
 
-from mainapp.views import proxy_view, set_jquery_script_tag
+from mainapp.views import delete_script_and_style_tags, replace_words_in_html, create_bs4_obj, add_tms, proxy_view
 
 
-class SetJQueryScriptTagTest(TestCase):
+class DeleteTagsTest(TestCase):
     """
-    Tests for set_jquery_script_tag func in mainapp/views.py
+    Tests for delete_script_and_style_tags func in mainapp/views.py
     """
     def test_what_return(self):
         """
         Check what function returns
         """
         soup_obj = BeautifulSoup('', 'lxml')
-        self.assertEqual(set_jquery_script_tag(soup_obj, 'some text'), None)
+        self.assertEqual(delete_script_and_style_tags(soup_obj), None)
 
-    def test_with_valid_html_param(self):
+    def test_with_valid_func_param(self):
         """
-        Check how the function changes the bs4 object when receiving valid parameters
+        Check how the function changes the bs4 object when receiving valid parameter
         """
         soup_obj1 = BeautifulSoup('', 'lxml')
         soup_obj2 = BeautifulSoup('', 'lxml')
-        src = 'some text'
-        set_jquery_script_tag(soup_obj1, src)
+        delete_script_and_style_tags(soup_obj1)
 
-        # Has the soup_obj1 really changed?
+        # Check that the soup_obj1 has not changed.
+        self.assertEqual(soup_obj1, soup_obj2)
+
+        soup_obj1 = BeautifulSoup('<script></script><style></style>', 'lxml')
+        soup_obj2 = BeautifulSoup('<script></script><style></style>', 'lxml')
+        delete_script_and_style_tags(soup_obj1)
+
+        # Check that the soup_obj1 has changed.
         self.assertNotEqual(soup_obj1, soup_obj2)
 
-        # Checking the value of the bs4 object with an empty html
-        self.assertEqual('<script src="{}" type="text/javascript"></script>'.format(src), str(soup_obj1))
+        # Verify that correct data is returned after removing tags.
+        delete_script_and_style_tags(soup_obj2)
+        self.assertEqual(soup_obj2, BeautifulSoup('<html><head></head></html>', 'lxml'))
 
-        # Checking the value of the bs4 object with html having a <head> tag
-        soup = BeautifulSoup('<head></head>', 'lxml')
-        set_jquery_script_tag(soup, src)
-        self.assertEqual(
-            '<html><head><script src="some text" type="text/javascript"></script></head></html>'.format(src),
-            str(soup)
-        )
-
-        # Checking the value of the bs4 object with html not having a <head> tag
-        soup = BeautifulSoup('<h1></h1>', 'lxml')
-        set_jquery_script_tag(soup, src)
-        self.assertEqual(
-            '<html><body><h1></h1></body></html><script src="{}" type="text/javascript"></script>'.format(src),
-            str(soup)
-        )
-
-    def test_with_invalid_html_param(self):
+    def test_with_invalid_func_param(self):
         """
-        What happens if the function gets a different type of object instead of bs4 object?
+        Check how the function works when receiving invalid parameter
         """
-        objects = ((1, 1), ('text', 'text'), (print, print), (['hello'], ['hello']))
+        params = [1, 'some text', ['list'], max, {'mutable'}]
+        params_copy = params.copy()
 
-        for obj in objects:
-            obj1, obj2 = obj
-            set_jquery_script_tag(obj1, 'some text')
-            self.assertEqual(obj1, obj2)
-            self.assertEqual(set_jquery_script_tag(obj2, 'some text'), None)
-
-
-class ProxyViewTest(TestCase):
-    """
-    Tests for proxy_view func in mainapp/views.py
-    """
-    def setUp(self):
-        self.factory = RequestFactory()
-
-    def test_response_type(self):
-        """
-        Check the type of response
-        """
-        request = self.factory.get('/')
-        self.assertEqual(type(HttpResponse()), type(proxy_view(request, '')))
+        for idx, param in enumerate(params):
+            self.assertEqual(delete_script_and_style_tags(param), None)
+            self.assertEqual(param, params_copy[idx])
