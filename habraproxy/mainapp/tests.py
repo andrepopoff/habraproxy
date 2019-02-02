@@ -8,23 +8,25 @@ class DeleteTagsTest(TestCase):
     """
     Tests for delete_script_and_style_tags func in mainapp/views.py
     """
+    def setUp(self):
+        self.soup_obj1 = BeautifulSoup('', 'lxml')
+        self.soup_obj2 = BeautifulSoup('', 'lxml')
+
     def test_what_return(self):
         """
         Check what function returns
         """
-        soup_obj = BeautifulSoup('', 'lxml')
-        self.assertEqual(delete_script_and_style_tags(soup_obj), None)
+        print(self.soup_obj2)
+        self.assertEqual(delete_script_and_style_tags(self.soup_obj1), None)
 
     def test_with_valid_func_param(self):
         """
         Check how the function changes the bs4 object when receiving valid parameter
         """
-        soup_obj1 = BeautifulSoup('', 'lxml')
-        soup_obj2 = BeautifulSoup('', 'lxml')
-        delete_script_and_style_tags(soup_obj1)
+        delete_script_and_style_tags(self.soup_obj1)
 
         # Check that the soup_obj1 has not changed.
-        self.assertEqual(soup_obj1, soup_obj2)
+        self.assertEqual(self.soup_obj1, self.soup_obj2)
 
         soup_obj1 = BeautifulSoup('<script></script><style></style>', 'lxml')
         soup_obj2 = BeautifulSoup('<script></script><style></style>', 'lxml')
@@ -47,3 +49,4 @@ class DeleteTagsTest(TestCase):
         for idx, param in enumerate(params):
             self.assertEqual(delete_script_and_style_tags(param), None)
             self.assertEqual(param, params_copy[idx])
+
