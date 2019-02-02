@@ -48,7 +48,12 @@ def create_bs4_obj(html):
     :param html: string containing HTML code
     :return: bs4.BeautifulSoup object
     """
-    soup = BeautifulSoup(html, 'lxml')
+    try:
+        soup = BeautifulSoup(html, 'lxml')
+    except TypeError:
+        print('Expected string or bytes-like object in html param')
+        soup = BeautifulSoup('', 'lxml')
+
     delete_script_and_style_tags(soup)
     return soup
 
