@@ -94,7 +94,7 @@ class CreateBsObjectTest(TestCase):
         """
         Check what function returns
         """
-        # HTML without script ans style tags
+        # HTML without script and style tags
         html_without_scripts = '<h1>Hello world</h1>'
         soup_obj = BeautifulSoup(html_without_scripts, 'lxml')
         new_soup = create_bs4_obj(html_without_scripts)
@@ -121,4 +121,23 @@ class CreateBsObjectTest(TestCase):
             new_soup = create_bs4_obj(param)
             self.assertEqual(new_soup, BeautifulSoup('', 'lxml'))
 
+
+class AddTMsTest(TestCase):
+    """
+    Tests for add_tms func in mainapp/views.py
+    """
+    def test_returned_data(self):
+        """
+        Checks that function returns
+        """
+
+        # HTML without 6 letter words
+        html_without_six_letter_words = '<h1>Hello world</h1>'
+        new_html = add_tms(html_without_six_letter_words)
+        self.assertEqual(new_html, html_without_six_letter_words)
+
+        # HTML with 6 letter words
+        html_with_six_letter_words = '<h1>Friend друзья</h1>'
+        new_html = add_tms(html_with_six_letter_words)
+        self.assertEqual(new_html, '<h1>Friend™ друзья™</h1>')
 
