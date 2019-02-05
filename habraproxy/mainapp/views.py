@@ -96,4 +96,9 @@ def proxy_view(request, url):
 
     # I had to change the code for the plus signs, because they were displayed incorrectly
     html_with_right_pluses = html_with_right_urls.replace('&amp;plus;', '&#43;')
-    return HttpResponse(html_with_right_pluses)
+
+    # Change the https://geektimes.com/..., because there is a redirect to the http://habr.com/... page
+    gt = 'href="https://geektimes.com/?utm_source=tm_habrahabr&amp;utm_medium=tm_top_panel&amp;utm_campaign=tm_promo"'
+    html = html_with_right_pluses.replace(gt, 'href="http://{}/flows/geektimes/"'.format(request.get_host()))
+
+    return HttpResponse(html)
