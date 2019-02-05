@@ -5,16 +5,20 @@ from requests import get
 from bs4 import BeautifulSoup
 
 
-def delete_script_and_style_tags(soup_obj):
+def delete_tags(soup_obj, tag_names=None):
     """
-    This function removes the <script> and <style> tags from the bs4.BeautifulSoup object.
+    This function removes tags from the bs4.BeautifulSoup object.
 
     :param soup_obj: bs4.BeautifulSoup object
+    :param tag_names: list with tag names to remove
     :return: None
     """
     try:
-        for tag in soup_obj(['script', 'style']):
-            tag.decompose()
+        if tag_names and isinstance(tag_names, list):
+            for tag in soup_obj(tag_names):
+                tag.decompose()
+        else:
+            print('Invalid "tag_names" parameter!')
     except (TypeError, AttributeError):
         print('Parameter "soup_obj" is not equal to bs4.BeautifulSoup object')
 
@@ -41,20 +45,23 @@ def replace_words_in_html(text, changed_words, html):
         return html
 
 
-def create_bs4_obj(html):
+def create_bs4_obj(html, scripts=True, styles=True):
     """
     This function creates a bs4.BeautifulSoup object from the string
 
     :param html: string containing HTML code
+    :param scripts: if False, the <script> tags will be removed
+    :param styles: if False, the <style> tags will be removed
     :return: bs4.BeautifulSoup object
     """
     try:
         soup = BeautifulSoup(html, 'lxml')
+        scripts or delete_tags(soup, ['script'])
+        styles or delete_tags(soup, ['style'])
     except TypeError:
         print('Expected string or bytes-like object in html param')
         soup = BeautifulSoup('', 'lxml')
 
-    delete_script_and_style_tags(soup)
     return soup
 
 
@@ -65,7 +72,7 @@ def add_tms(html):
     :param html: string containing HTML code
     :return: changed string containing HTML code
     """
-    soup = create_bs4_obj(html)
+    soup = create_bs4_obj(html, scripts=False, styles=False)
     changed_words = set()
 
     for tag in soup.find_all(True):
@@ -84,7 +91,7 @@ def proxy_view(request, url):
     """
     source_html = get('https://habr.com/' + url).text
     html = add_tms(source_html)
-    soup = create_bs4_obj(html)
+    soup = create_bs4_obj(html, styles=False)
     html_with_right_urls = str(soup).replace('href="https://habr.com/', 'href="http://{}/'.format(request.get_host()))
 
     # I had to change the code for the plus signs, because they were displayed incorrectly
