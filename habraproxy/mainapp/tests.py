@@ -3,53 +3,63 @@ from django.shortcuts import HttpResponse
 from django.test.client import RequestFactory
 from bs4 import BeautifulSoup
 
-from mainapp.views import delete_script_and_style_tags, replace_words_in_html, create_bs4_obj, add_tms, proxy_view
+from mainapp.views import delete_tags, replace_words_in_html, create_bs4_obj, add_tms, proxy_view
 
 
 class DeleteTagsTest(TestCase):
     """
-    Tests for delete_script_and_style_tags func in mainapp/views.py
+    Tests for delete_tags func in mainapp/views.py
     """
     def setUp(self):
         self.soup_obj1 = BeautifulSoup('', 'lxml')
         self.soup_obj2 = BeautifulSoup('', 'lxml')
 
-    def test_what_return(self):
+    def test_what_returns(self):
         """
         Check what function returns
         """
-        self.assertEqual(delete_script_and_style_tags(self.soup_obj1), None)
+        self.assertEqual(delete_tags(self.soup_obj1, ['script']), None)
 
-    def test_with_valid_func_param(self):
+    def test_with_valid_func_params(self):
         """
         Check how the function changes the bs4 object when receiving valid parameter
         """
-        delete_script_and_style_tags(self.soup_obj1)
+        delete_tags(self.soup_obj1, ['script'])
 
         # Check that the soup_obj1 has not changed.
         self.assertEqual(self.soup_obj1, self.soup_obj2)
 
         soup_obj1 = BeautifulSoup('<script></script><style></style>', 'lxml')
         soup_obj2 = BeautifulSoup('<script></script><style></style>', 'lxml')
-        delete_script_and_style_tags(soup_obj1)
+        delete_tags(soup_obj1, ['script'])
 
         # Check that the soup_obj1 has changed.
         self.assertNotEqual(soup_obj1, soup_obj2)
 
         # Verify that correct data is returned after removing tags.
-        delete_script_and_style_tags(soup_obj2)
+        delete_tags(soup_obj2, ['script', 'style'])
         self.assertEqual(soup_obj2, BeautifulSoup('<html><head></head></html>', 'lxml'))
 
-    def test_with_invalid_func_param(self):
+    def test_with_invalid_func_params(self):
         """
         Check how the function works when receiving invalid parameter
         """
-        params = [1, 'some text', ['list'], max, {'mutable'}]
-        params_copy = params.copy()
 
-        for idx, param in enumerate(params):
-            self.assertEqual(delete_script_and_style_tags(param), None)
-            self.assertEqual(param, params_copy[idx])
+        # If something else came in instead of the soup object
+        instead_of_soup_obj = [1, 'some text', ['list'], max, {'mutable'}, True]
+        instead_of_soup_obj_copy = instead_of_soup_obj.copy()
+
+        for idx, param in enumerate(instead_of_soup_obj):
+            self.assertEqual(delete_tags(param, ['script']), None)
+            self.assertEqual(param, instead_of_soup_obj_copy[idx])
+
+        # If something else came in instead of the list of the tag names
+        instead_of_tag_names = [1, 'some text', max, {'mutable'}, True]
+        instead_of_tag_names_copy = instead_of_tag_names.copy()
+
+        for idx, param in enumerate(instead_of_tag_names):
+            self.assertEqual(delete_tags(self.soup_obj1, param), None)
+            self.assertEqual(param, instead_of_tag_names_copy[idx])
 
 
 class ReplaceWordsTest(TestCase):
@@ -105,23 +115,31 @@ class CreateBsObjectTest(TestCase):
         # HTML with script tag
         html_with_scripts = '<h1>Hello world</h1><script>text</script>'
         soup_obj = BeautifulSoup(html_with_scripts, 'lxml')
-        new_soup = create_bs4_obj(html_with_scripts)
+        new_soup = create_bs4_obj(html_with_scripts, scripts=False)
         self.assertNotEqual(new_soup, soup_obj)
 
         # HTML with style tag
         html_with_styles = '<h1>Hello world</h1><style>text</style>'
         soup_obj = BeautifulSoup(html_with_styles, 'lxml')
-        new_soup = create_bs4_obj(html_with_styles)
+        new_soup = create_bs4_obj(html_with_styles, styles=False)
         self.assertNotEqual(new_soup, soup_obj)
 
     def test_with_invalid_param(self):
         """
         Check how the function works when receiving invalid parameter instead of string
         """
-        params = [1, 2.0, {'mutable'}, ['some list'], max]
-        for param in params:
+
+        # If instead of html string came another data type
+        instead_of_html_string = [1, 2.0, {'mutable'}, ['some list'], max]
+        for param in instead_of_html_string:
             new_soup = create_bs4_obj(param)
             self.assertEqual(new_soup, BeautifulSoup('', 'lxml'))
+
+        # If instead of scripts or styles parameters came another data type
+        wrong_data = [1, 2.0, {'mutable'}, ['some list'], max]
+        for param in wrong_data:
+            new_soup = create_bs4_obj('<h1>Hello world</h1><script>text</script>', scripts=param, styles=param)
+            self.assertEqual(new_soup, BeautifulSoup('<h1>Hello world</h1><script>text</script>', 'lxml'))
 
 
 class AddTMsTest(TestCase):
