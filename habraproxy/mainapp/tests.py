@@ -161,6 +161,11 @@ class AddTMsTest(TestCase):
         new_html = add_tms(html_with_six_letter_words)
         self.assertEqual(new_html, '<h1>Friend™ друзья™</h1>')
 
+        # HTML with same 6 letter words in <h1> and <script>
+        html = '<h1>Friend друзья</h1><script>Friend друг</script><style>друзья friends</style>'
+        new_html = add_tms(html)
+        self.assertEqual(new_html, '<h1>Friend™ друзья™</h1><script>Friend друг</script><style>друзья friends</style>')
+
 
 class ProxyViewTest(TestCase):
     """
