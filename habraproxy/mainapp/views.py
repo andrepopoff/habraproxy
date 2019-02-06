@@ -4,6 +4,8 @@ from django.shortcuts import HttpResponse
 from requests import get
 from bs4 import BeautifulSoup
 
+from mainapp.entities import HTML_ENTITIES
+
 
 def delete_tags(soup_obj, tag_names=None):
     """
@@ -65,6 +67,37 @@ def create_bs4_obj(html, scripts=True, styles=True):
     return soup
 
 
+def remove_tm_from_html_entities(html, changed_words):
+    """
+    Removes ™ from html-entities
+
+    :param html: string containing HTML code
+    :param changed_words: set of words that have been replaced
+    :return: string containing HTML code
+    """
+    for word in changed_words:
+        if word in HTML_ENTITIES:
+            html = html.replace('&amp;{}™;'.format(word), '&amp;{};'.format(word))
+            html = html.replace('&{}™;'.format(word), '&{};'.format(word))
+
+    return html
+
+
+def remove_tm_from_scripts_and_styles(html):
+    """
+    Removes ™ from <script> and <style> tags
+
+    :param html: string containing HTML code
+    :return: string containing HTML code
+    """
+    soup = create_bs4_obj(html)
+    for tag in soup.find_all(['script', 'style']):
+        if tag.string and '™' in tag.string:
+            html = html.replace(tag.string, tag.string.replace('™', ''))
+
+    return html
+
+
 def add_tms(html):
     """
     This function prepares data for processing and adds ™ to all 6 letter words.
@@ -82,11 +115,8 @@ def add_tms(html):
         elif tag.text:
             html = replace_words_in_html(tag.text, changed_words, html)
 
-    # Removing ™ from <script> and <style> tags
-    soup = create_bs4_obj(html)
-    for tag in soup.find_all(['script', 'style']):
-        if tag.string and '™' in tag.string:
-            html = html.replace(tag.string, tag.string.replace('™', ''))
+    html = remove_tm_from_html_entities(html, changed_words)
+    html = remove_tm_from_scripts_and_styles(html)
 
     return html
 
