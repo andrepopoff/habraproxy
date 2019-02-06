@@ -75,11 +75,18 @@ def add_tms(html):
     soup = create_bs4_obj(html, scripts=False, styles=False)
     changed_words = set()
 
+    # Adding ™ to words
     for tag in soup.find_all(True):
         if tag.string:
             html = replace_words_in_html(tag.string, changed_words, html)
         elif tag.text:
             html = replace_words_in_html(tag.text, changed_words, html)
+
+    # Removing ™ from <script> and <style> tags
+    soup = create_bs4_obj(html)
+    for tag in soup.find_all(['script', 'style']):
+        if tag.string and '™' in tag.string:
+            html = html.replace(tag.string, tag.string.replace('™', ''))
 
     return html
 
@@ -90,15 +97,22 @@ def proxy_view(request, url):
     Appends ™ to all 6 letter words
     """
     source_html = get('https://habr.com/' + url).text
+    host = request.get_host()
     html = add_tms(source_html)
     soup = create_bs4_obj(html, styles=False)
-    html_with_right_urls = str(soup).replace('href="https://habr.com/', 'href="http://{}/'.format(request.get_host()))
+
+    # Remove meta-posts, because they appear when the page loads
+    bmenu_inner = soup.find('div', class_='bmenu_inner')
+    if bmenu_inner:
+        bmenu_inner.decompose()
+
+    html_with_right_urls = str(soup).replace('href="https://habr.com', 'href="http://{}'.format(host))
 
     # I had to change the code for the plus signs, because they were displayed incorrectly
     html_with_right_pluses = html_with_right_urls.replace('&amp;plus;', '&#43;')
 
     # Change the https://geektimes.com/..., because there is a redirect to the http://habr.com/... page
     gt = 'href="https://geektimes.com/?utm_source=tm_habrahabr&amp;utm_medium=tm_top_panel&amp;utm_campaign=tm_promo"'
-    html = html_with_right_pluses.replace(gt, 'href="http://{}/flows/geektimes/"'.format(request.get_host()))
+    html = html_with_right_pluses.replace(gt, 'href="http://{}/flows/geektimes/"'.format(host))
 
     return HttpResponse(html)
